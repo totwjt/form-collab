@@ -28,9 +28,9 @@
 </template>
 
 <script setup lang="ts">
-import { HelloWorld } from '@monorepo-starter/vue'
-import { HelloWorldCore } from '@monorepo-starter/core'
-import { formatDate } from '@monorepo-starter/utils'
+import { HelloWorld } from '@form-collab/vue'
+import { HelloWorldCore } from '@form-collab/core'
+import { formatDate } from '@form-collab/utils'
 
 const coreMessage = HelloWorldCore()
 

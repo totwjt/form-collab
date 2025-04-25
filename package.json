@@ -1,5 +1,5 @@
 {
-  "name": "monorepo-starter",
+  "name": "form-collab",
   "version": "0.1.0",
   "private": true,
   "volta": {
@@ -17,7 +17,9 @@
     "version-packages": "changeset version",
     "release": "turbo run build && changeset publish",
     "commit": "chmod +x ./scripts/commit.sh && ./scripts/commit.sh",
-    "demo": "pnpm build && pnpm --filter @monorepo-starter/demo dev"
+    "demo": "pnpm build && pnpm --filter @form-collab/demo dev",
+    "server:dev": "pnpm --filter @form-collab/server dev",
+    "server:start": "node packages/server/dist/index.js"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",

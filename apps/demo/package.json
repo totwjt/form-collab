@@ -1,17 +1,17 @@
 {
-  "name": "@monorepo-starter/demo",
+  "name": "@form-collab/demo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @monorepo-starter/vue build && vite",
-    "build": "pnpm --filter @monorepo-starter/vue build && vite build",
+    "dev": "pnpm --filter @form-collab/vue build && vite",
+    "build": "pnpm --filter @form-collab/vue build && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@monorepo-starter/core": "workspace:*",
-    "@monorepo-starter/utils": "workspace:*",
-    "@monorepo-starter/vue": "workspace:*",
+    "@form-collab/core": "workspace:*",
+    "@form-collab/utils": "workspace:*",
+    "@form-collab/vue": "workspace:*",
     "vue": "^3.3.0"
   },
   "devDependencies": {
