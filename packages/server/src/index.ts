@@ -15,11 +15,13 @@ interface Lock {
 }
 
 interface Message {
-  type: 'lock' | 'unlock' | 'error';
+  type: 'lock' | 'unlock' | 'error' | 'update';
   data: {
     key: string;
     user?: User;
     error?: string;
+    formId?: string;
+    value?: any;
   };
 }
 
@@ -29,7 +31,7 @@ export class CollabServer {
   private locks: Map<string, Lock>;
   private clients: Map<string, WebSocket>;
 
-  constructor(port: number = 3000) {
+  constructor(port: number = 8088) {
     this.app = express();
     this.wss = new WebSocketServer({ port: port + 1 });
     this.locks = new Map();
@@ -85,7 +87,7 @@ export class CollabServer {
 
   private handleMessage(message: Message, clientId: string) {
     const { type, data } = message;
-    const { key, user } = data;
+    const { key, user, formId, value } = data;
 
     switch (type) {
       case 'lock':
@@ -121,6 +123,20 @@ export class CollabServer {
           });
         }
         break;
+
+      case 'update':
+        if (formId && value !== undefined) {
+          this.broadcast({
+            type: 'update',
+            data: {
+              key: formId,
+              formId,
+              value,
+              user: { ...user!, id: clientId }
+            }
+          });
+        }
+        break;
     }
   }
 
@@ -141,12 +157,14 @@ export class CollabServer {
   }
 
   public start() {
-    this.app.listen(3000, () => {
-      console.log('HTTP server started on port 3000');
+    this.app.listen(8088, () => {
+      console.log('HTTP server started on port 8088');
     });
-    console.log('WebSocket server started on port 3001');
+    console.log('WebSocket server started on port 8089');
   }
 }
 
 // 导出默认实例
-export default new CollabServer();
+const server = new CollabServer();
+server.start();
+export default server;

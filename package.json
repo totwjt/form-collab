@@ -19,19 +19,21 @@
     "commit": "chmod +x ./scripts/commit.sh && ./scripts/commit.sh",
     "demo": "pnpm build && pnpm --filter @form-collab/demo dev",
     "server:dev": "pnpm --filter @form-collab/server dev",
-    "server:start": "node packages/server/dist/index.js"
+    "server:start": "node packages/server/dist/index.js",
+    "start": "concurrently \"pnpm --filter @form-collab/server dev\" \"pnpm --filter @form-collab/demo dev\""
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
+    "@types/node": "^20.11.19",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "concurrently": "^9.1.2",
     "eslint": "^8.0.0",
     "eslint-plugin-vue": "^9.0.0",
     "pnpm": "^8.0.0",
+    "prettier": "^3.2.5",
     "turbo": "^1.12.3",
-    "typescript": "^5.0.0",
-    "@types/node": "^20.11.19",
-    "prettier": "^3.2.5"
+    "typescript": "^5.0.0"
   },
   "packageManager": "pnpm@8.15.3",
   "engines": {
