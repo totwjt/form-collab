@@ -1,5 +1,7 @@
 import { FormUser } from './user'
 
+export type { FormUser }
+
 export interface FormMessage {
   type: 'update' | 'lock' | 'unlock' | 'error'
   data: {

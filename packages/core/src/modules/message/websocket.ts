@@ -1,4 +1,4 @@
-import { FormMessage, FormState, FormUser } from '../../types/message'
+import { FormMessage, FormUser } from '../../types/message'
 
 export class WebSocketClient {
   private ws: WebSocket | null = null
@@ -6,7 +6,7 @@ export class WebSocketClient {
   private isConnected = false
   private changeCallbacks: ((field: string, value: any) => void)[] = []
 
-  constructor(private url: string, private user: FormUser) {
+  constructor(private url: string, public user: FormUser) {
     this.connect()
   }
 
