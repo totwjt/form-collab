@@ -1,2 +1,2 @@
-export * from './store'
+export { FormStore } from './store'
 export * from './websocket'

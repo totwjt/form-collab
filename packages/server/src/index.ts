@@ -8,21 +8,19 @@ interface User {
   name: string;
 }
 
-interface Lock {
-  key: string;
-  user: User;
-  timestamp: number;
-}
-
 interface Message {
-  type: 'lock' | 'unlock' | 'error' | 'update';
+  type: 'update' | 'lock' | 'unlock' | 'error';
   data: {
-    key: string;
+    field?: string;
+    value?: any;
     user?: User;
     error?: string;
-    formId?: string;
-    value?: any;
   };
+}
+
+interface Lock {
+  user: User;
+  timestamp: number;
 }
 
 export class CollabServer {
@@ -30,12 +28,14 @@ export class CollabServer {
   private wss: WebSocketServer;
   private locks: Map<string, Lock>;
   private clients: Map<string, WebSocket>;
+  private users: Map<string, User>;
 
   constructor(port: number = 8088) {
     this.app = express();
     this.wss = new WebSocketServer({ port: port + 1 });
     this.locks = new Map();
     this.clients = new Map();
+    this.users = new Map();
 
     this.setupExpress();
     this.setupWebSocket();
@@ -71,82 +71,98 @@ export class CollabServer {
 
       ws.on('close', () => {
         this.clients.delete(clientId);
-        // 清理该用户的所有锁
-        for (const [key, lock] of this.locks.entries()) {
-          if (lock.user.id === clientId) {
-            this.locks.delete(key);
-            this.broadcast({
-              type: 'unlock',
-              data: { key }
-            });
+        const user = this.users.get(clientId);
+        if (user) {
+          this.users.delete(clientId);
+          // 清理该用户的所有锁
+          for (const [key, lock] of this.locks.entries()) {
+            if (lock.user.id === clientId) {
+              this.locks.delete(key);
+              this.broadcast({
+                type: 'unlock',
+                data: { field: key }
+              });
+            }
           }
+          // 广播用户离开消息
+          this.broadcast({
+            type: 'update',
+            data: { user: { ...user, id: '' } } // 发送空 ID 表示用户离开
+          });
         }
       });
     });
   }
 
   private handleMessage(message: Message, clientId: string) {
-    const { type, data } = message;
-    const { key, user, formId, value } = data;
-
-    switch (type) {
-      case 'lock':
-        if (!this.locks.has(key)) {
-          const lock: Lock = {
-            key,
-            user: { ...user!, id: clientId },
-            timestamp: Date.now()
-          };
-          this.locks.set(key, lock);
+    console.log('Server handling message:', message, 'from client:', clientId)
+    switch (message.type) {
+      case 'update':
+        if (message.data.user) {
+          // 处理用户加入/更新
+          const user = { ...message.data.user, id: clientId }
+          console.log('Adding/updating user:', user)
+          this.users.set(clientId, user)
+          // 广播用户信息给所有客户端
           this.broadcast({
-            type: 'lock',
-            data: { key, user: lock.user }
-          });
-        } else {
-          const existingLock = this.locks.get(key)!;
-          this.sendToClient(clientId, {
-            type: 'error',
+            type: 'update',
+            data: { user }
+          })
+        }
+        if (message.data.field && message.data.value !== undefined) {
+          // 广播字段更新
+          this.broadcast({
+            type: 'update',
             data: {
-              key,
-              error: `Element is locked by ${existingLock.user.name}`
+              field: message.data.field,
+              value: message.data.value
             }
-          });
+          })
+        }
+        break
+
+      case 'lock':
+        if (message.data.field && message.data.user) {
+          const user = this.users.get(clientId);
+          if (user) {
+            this.locks.set(message.data.field, {
+              user: { ...user, id: clientId },
+              timestamp: Date.now()
+            });
+            this.broadcast({
+              type: 'lock',
+              data: {
+                field: message.data.field,
+                user: { ...user, id: clientId }
+              }
+            });
+          }
         }
         break;
 
       case 'unlock':
-        if (this.locks.has(key) && this.locks.get(key)!.user.id === clientId) {
-          this.locks.delete(key);
-          this.broadcast({
-            type: 'unlock',
-            data: { key }
-          });
-        }
-        break;
-
-      case 'update':
-        if (formId && value !== undefined) {
-          this.broadcast({
-            type: 'update',
-            data: {
-              key: formId,
-              formId,
-              value,
-              user: { ...user!, id: clientId }
-            }
-          });
+        if (message.data.field) {
+          const lock = this.locks.get(message.data.field);
+          if (lock && lock.user.id === clientId) {
+            this.locks.delete(message.data.field);
+            this.broadcast({
+              type: 'unlock',
+              data: { field: message.data.field }
+            });
+          }
         }
         break;
     }
   }
 
   private broadcast(message: Message) {
-    const messageStr = JSON.stringify(message);
+    console.log('Broadcasting message:', message)
+    const messageStr = JSON.stringify(message)
     this.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(messageStr);
+        client.send(messageStr)
       }
-    });
+    })
   }
 
   private sendToClient(clientId: string, message: Message) {
@@ -164,7 +180,7 @@ export class CollabServer {
   }
 }
 
-// 导出默认实例
+// 启动服务器
 const server = new CollabServer();
 server.start();
 export default server;

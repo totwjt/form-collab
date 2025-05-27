@@ -72,10 +72,16 @@ importers:
 
   packages/core:
     dependencies:
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       vue:
         specifier: ^3.3.0
         version: 3.5.13(typescript@5.8.3)
     devDependencies:
+      '@types/uuid':
+        specifier: ^9.0.8
+        version: 9.0.8
       tsup:
         specifier: ^7.3.0
         version: 7.3.0(typescript@5.8.3)

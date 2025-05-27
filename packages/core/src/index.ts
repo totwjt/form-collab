@@ -1,9 +1,11 @@
+export * from './types/user'
+export * from './types/message'
+export * from './modules/message/store'
+export * from './modules/message/websocket'
+export * from './modules/field/events'
 
-export * from './modules/user'
-export * from './modules/message'
-
-export { FormStore } from './store';
-export type { FormUser } from './types';
+// 显式导出 FormStore
+export { FormStore } from './modules/message/store'
 
 export function greet(name: string): string {
   return `Hello, ${name}!`

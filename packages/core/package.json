@@ -22,9 +22,11 @@
     "test": "vitest"
   },
   "dependencies": {
+    "uuid": "^9.0.1",
     "vue": "^3.3.0"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.8",
     "tsup": "^7.3.0",
     "typescript": "^5.3.3",
     "vitest": "^1.2.2"
